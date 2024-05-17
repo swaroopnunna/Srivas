@@ -1,0 +1,111 @@
+<HTML>
+<HEAD>
+	<SCRIPT>
+		
+		var tablesSelected = [];
+		var randomTable = 0;
+		var randomNumber = 0;
+		
+		function tableStartButtonClicked()
+		{
+			tablesSelected = [];
+			var checkboxes = document.getElementsByName('MathsTable');
+			
+			for (var i = 0; i < checkboxes.length; i++)
+			{
+				if (checkboxes[i].checked)
+				{
+					// Checkbox is checked, add its value to the array
+					tablesSelected.push(checkboxes[i].value);
+				}
+			}
+						
+			generateRandomMathsTable();
+		}
+		
+		function generateRandomMathsTable()
+		{
+			if (tablesSelected.length > 0) //Executes only when atleast one checkbox is checked
+			{			
+				var randomIndex = Math.floor(Math.random() * tablesSelected.length)
+				randomTable = tablesSelected[randomIndex];
+			
+				// generates a random number between 2 and 12
+				randomNumber = Math.floor(Math.random() * (12 - 2 + 1)) + 2;
+			
+				document.getElementById('randomGeneratedMathsTable').innerHTML = randomTable +  '&nbsp; x &nbsp;' + randomNumber + '&nbsp; = &nbsp;';
+				
+			}
+		}
+		
+		function tableClearButtonClicked()
+		{
+			var checkboxes = document.getElementsByName('MathsTable');
+			
+			for (var i = 0; i < checkboxes.length; i++)
+			{
+				checkboxes[i].checked = false;				
+			}
+			document.getElementById('randomGeneratedMathsTable').innerHTML='';
+			tablesSelected=[];
+		}
+		
+		function showAnswerButtonClicked()
+		{
+		
+			alert(randomTable + 'x' + randomNumber);
+			
+		}
+		
+		
+	</SCRIPT>
+</HEAD>
+<BODY onKeyPress = "generateRandomMathsTable()" onClick="generateRandomMathsTable()">
+
+	<CENTER>
+	<FONT size="3px" face="Cambria Math">
+		Select tables:
+		<BR><BR>
+	</FONT>
+	
+	<FONT face="Cambria Math">
+	
+	<input type="checkbox" id="TableTwo" name="MathsTable" value="2">	<label for="TableTwo"> 2</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableThree" name="MathsTable" value="3">	<label for="TableThree"> 3</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableFour" name="MathsTable" value="4">	<label for="TableThree"> 4</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	<input type="checkbox" id="TableFive" name="MathsTable" value="5">	<label for="TableTwo"> 5</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableSix" name="MathsTable" value="6">	<label for="TableTwo"> 6</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableSeven" name="MathsTable" value="7">	<label for="TableThree"> 7</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableEight" name="MathsTable" value="8">	<label for="TableThree"> 8</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	<input type="checkbox" id="TableNine" name="MathsTable" value="9">	<label for="TableTwo"> 9</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableTen" name="MathsTable" value="10">	<label for="TableTwo"> 10</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableEleven" name="MathsTable" value="11">	<label for="TableThree"> 11</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	<input type="checkbox" id="TableTwelve" name="MathsTable" value="12">	<label for="TableThree"> 12</label>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	</FONT>
+	<BR><BR>
+	
+	<Button id="tableStartButton" name="tableStartButton" style="width:150px;" onclick="tableStartButtonClicked()">Start</Button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<Button id="tableClearButton" name="tableClearButton" style="width:150px;" onclick="tableClearButtonClicked()">Clear Selection</Button>
+	
+	<BR><BR><BR>
+	<HR WIDTH='50%'>
+	<BR><BR>
+	<FONT size="25px" face="Cambria Math">
+		<DIV id="randomGeneratedMathsTable"></DIV>
+	</FONT>	
+	
+	</CENTER>
+	
+</BODY>
+</HTML>
