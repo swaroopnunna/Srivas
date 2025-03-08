@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+				
+		<script>
+	
+		var apiKey = 'AIzaSyDDShQe1qbJn2gOBEpHVCVq4h2-_tp2B5E';
+        var spreadsheetId = '1inQ8GkTRlu_oH6BhWiLZUJHXAkmX8igbekAwgKlaqw8';
+		var url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?key=${apiKey}`;
+
+		var myTimeout = "";
+		
+		var sheetNamesArray = [];
+		
+		var selectedSheetData = new Array();
+		
+		var currentLessonWords = new Array();
+		
+		var randomWord = "";
+		
+		var selectedSubject = '';
+		var selectedLesson = '';
+		
+		function ShowSubjectNamesFunction()
+		{
+		
+			clearTimeout(myTimeout);
+			
+			var showRadioButtonsText = '';
+			
+			for (var i=0;i<sheetNamesArray.length;i++)
+			{
+				showRadioButtonsText += '<input type="radio" id="' + sheetNamesArray[i] + '" name="SubjectRadioButton" value="' + sheetNamesArray[i] + '" onchange = "subjectRadioButtonClicked(this);">';
+				showRadioButtonsText += '<label for="' + sheetNamesArray[i] + '">' + sheetNamesArray[i] + '</label>';
+				showRadioButtonsText +=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+			}
+			
+			document.getElementById('showSubjectsRadioButtons').innerHTML = showRadioButtonsText;
+			
+		}
+		
+		function subjectRadioButtonClicked(src)
+		{
+			selectedSubject=src.id;
+			document.getElementById('showLessonRadioButtons').innerHTML='Loading Lesson names from ' + selectedSubject + '...';
+			getGoogleSheetDataFromSheetSelected(src.value);
+		}
+		
+		function ShowLessonNamesFunction()
+		{
+		
+			clearTimeout(myTimeout);
+			
+			var showRadioButtonsText = '';
+			
+			showRadioButtonsText = '<table border="0">';
+			showRadioButtonsText += '<tr>';
+	
+			
+			
+			
+			for (var i=0;i<selectedSheetData[0].length;i++)
+			{
+				showRadioButtonsText += '<td width="300">';
+				
+				showRadioButtonsText += '<input type="radio" id="' + selectedSheetData[0][i] + '" name="LessonRadioButton" value="' + i + '" onchange = "LessonRadioButtonClicked(this);">';
+				showRadioButtonsText += '<label for="' + selectedSheetData[0][i] + '">' + selectedSheetData[0][i] + '</label>';
+				showRadioButtonsText +=  '<BR>';
+				
+				showRadioButtonsText += '</td>';
+				
+				if (i%2)
+				{
+					showRadioButtonsText += '</tr> <tr>';
+				}
+			}
+			
+			showRadioButtonsText += '</tr>';
+			showRadioButtonsText += '</table>';
+			
+			document.getElementById('showLessonRadioButtons').innerHTML = showRadioButtonsText;
+		}
+		
+		function LessonRadioButtonClicked(src)
+		{
+			selectedLesson = src.id;
+			getLessonWords(src.value);
+			document.getElementById('getARandomWordButton').disabled = false;
+			document.getElementById('showSubjectsRadioButtons').innerHTML = 'Click here to reload the subjects';
+			document.getElementById('showingWhatNow').innerHTML = 'Showing words from... <B>Subject: </B>' + selectedSubject + '. <B>Lesson: </B>' + selectedLesson +'.<BR><BR>';
+		}
+		
+		function getLessonWords(src)
+		{
+			currentLessonWords = [];
+			
+			var count = 0;
+			
+			for (var i=1;i<selectedSheetData.length;i++)
+			{				
+				 //Not storing first word in the column in to the currentLessonWords as it will be the name of the lesson.
+				 if(Boolean(selectedSheetData[i][src]))
+				 {
+				 currentLessonWords[count++]=selectedSheetData[i][src];
+				 }
+			}
+		}
+		
+		function getGoogleSheetDataFromSheetSelected(sheetSelected)
+		{	
+			url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetSelected}?key=${apiKey}`
+			var values;
+			
+			fetch(url)
+			.then(response => response.json())
+			.then(data => {
+			values = data.values;
+			
+			for(var i=0;i<values.length;i++)
+			{
+				selectedSheetData[i] = new Array();
+				for (var j=0;j<values[i].length;j++)
+				{
+					selectedSheetData[i][j]=values[i][j];
+				}
+			}	
+			})
+			
+			myTimeout = setTimeout(ShowLessonNamesFunction,5000);
+		}
+		
+		function getARandomWord()
+		{
+			document.getElementById("displayWord").innerHTML='';
+			var randomIndex = Math.floor(Math.random() * currentLessonWords.length);
+			randomWord=currentLessonWords[randomIndex];						
+			document.getElementById("displayWord").innerHTML=randomWord;
+		}
+		
+		function getSubjectNamesFromGoogleSheet()
+		{
+			document.getElementById("getARandomWordButton").disabled = true;
+			
+			fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var sheets = data.sheets;
+                
+
+                if (sheets && sheets.length > 0) {
+                    sheets.forEach(sheet => {
+                        var sheetName = sheet.properties.title;
+						sheetNamesArray.push(sheetName);				
+                        
+                    });
+                }
+            })
+			
+			myTimeout = setTimeout(ShowSubjectNamesFunction, 5000);
+			
+		}
+		
+	function subjectsDivClicked()
+	{
+		if (document.getElementById('showSubjectsRadioButtons').innerHTML === 'Click here to reload the subjects')
+			location.reload();
+	}
+		
+    </script>
+</head>
+
+<body onLoad = "getSubjectNamesFromGoogleSheet()">
+	<table width="60%" align = "center" style="height:100px; border:solid black 3px; border-radius:10px; border-collapse:separate;">
+	<tr height="50px">
+		<td width="20%" style="border:dotted black 2px; vertical-align: middle;">
+			Select the Subject:
+		</td>
+		<td style=" border:dotted black 2px; vertical-align: middle;">
+
+			<div id="showSubjectsRadioButtons" onClick="subjectsDivClicked()">Loading Subject Names...</div>
+		</td>
+	</tr>
+	<tr height="150px">
+	
+		<td width="20%" style=" border:dotted black 2px; vertical-align: middle;">
+			Select the Lesson:
+		</td>
+		<td style=" border:dotted black 2px; vertical-align: middle;">
+			<div id="showLessonRadioButtons">Lessons will be loaded in few seconds after selecting the subject....</div>
+		</td>
+	</tr>
+	</table>
+	<BR>
+	<HR width = "65%">
+	
+	<font size="3" face="Verdana">
+	<div id="showingWhatNow" align="center"><BR></div>
+	</font>
+	
+	<center>
+	<button id="getARandomWordButton" onclick="getARandomWord()">Show A Random Word</button>	&nbsp;&nbsp;&nbsp;	
+	</center>
+	<BR><BR><BR>
+	
+	<font size="10" face="Verdana">
+	<div id="displayWord" align="center"></div>
+	</font>
+	
+</body>
+</html>

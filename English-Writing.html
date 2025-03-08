@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<HTML lang="en">
+<HEAD>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				
+<script>
+var apiKey = 'AIzaSyDDShQe1qbJn2gOBEpHVCVq4h2-_tp2B5E';
+var spreadsheetId = '1IvoI2D7KkhAnmpLnT-3ztEjj_u54lBd8iYIChaN8nb8';
+var sheetSelected='WritingContent';
+var url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetSelected}?key=${apiKey}`;
+var selectedSheetData = new Array();
+var WritingNameAndStatsText = '';
+var secondsPerChar = 2.5;
+var myTimeout = "";
+
+function getGoogleSheetsDataToArray()
+{
+	var values;
+
+	fetch(url)
+	.then(response => response.json())
+	.then(data => {
+	values = data.values;
+	for(var i=0;i<values.length;i++)
+	{
+		selectedSheetData[i] = new Array();
+		for (var j=0;j<values[i].length;j++)
+		{
+			selectedSheetData[i][j]=values[i][j];
+		}
+	}	
+	})
+	
+	myTimeout = setTimeout(showDropDownWithHeadingNamesFromSpreadsheet,5000);
+}
+
+function showDropDownWithHeadingNamesFromSpreadsheet()
+{
+	clearTimeout(myTimeout);
+	
+	var tempDropdownHTMLText = '';
+		tempDropdownHTMLText = '<select name="HeadingNamesDropdown" id="HeadingNamesDropdown" onchange="dropDownWithHeadingNamesChanged(this.value)">';
+	tempDropdownHTMLText += '<option value="Select">Select</option>';
+	for(var i=1;i<selectedSheetData.length;i++)
+	{
+	tempDropdownHTMLText += '<option value="'+ selectedSheetData[i][0] +'">'+ selectedSheetData[i][0] +'</option>';
+	}
+	tempDropdownHTMLText += '</select>';
+
+	document.getElementById('HeadingNamesDropdownDiv').innerHTML=tempDropdownHTMLText;
+}
+
+function dropDownWithHeadingNamesChanged(value)
+{
+	for(var i=1;i<selectedSheetData.length;i++)
+	{
+		if (value === 'Select')
+			document.getElementById('displayContentDiv').innerHTML='';
+		else if (value === selectedSheetData[i][0])			
+		{				
+			document.getElementById('displayContentDiv').innerHTML=selectedSheetData[i][1];
+			placeWritingNameAndStats(i);
+		}
+	}
+}
+
+function placeWritingNameAndStats(i)
+{
+	var currTime = new Date();
+	var numOfchars = selectedSheetData[i][1].length;
+	var expectedTime = new Date(currTime.getTime()+(numOfchars*secondsPerChar*1000));
+
+	WritingNameAndStatsText = 
+	'<table width = "100%" BORDER = "1"><tr>'+
+	'<td width = "15%">'+ 'No of Letters: ' + numOfchars 	+'</td>'+
+	'<td width = "60%" ALIGN="Center">'+ '<B>'	 +   selectedSheetData[i][0] + '</B>'	+'</td>'+
+	'<td width = "25%">'+ 'Start Time: ' + currTime.toLocaleTimeString() +'.<BR> Expected Finish Time: '+ expectedTime.toLocaleTimeString()	+ '.'	+'</td>'+
+	
+	'</tr></table>';
+
+	document.getElementById('WritingNameAndStats').innerHTML=WritingNameAndStatsText;			
+}
+
+</script>
+</HEAD>
+
+<BODY onLoad = "getGoogleSheetsDataToArray()">
+<TABLE BORDER = '0' WIDTH = 100%><TR>
+<TD WIDTH=20%>	<DIV ID="HeadingNamesDropdownDiv">Loading...</DIV>	</td>
+<TD WIDTH=80%>	<DIV ID="WritingNameAndStats" ALIGN="center"></DIV>	</td>
+</TR></TABLE>
+<HR>
+<FONT SIZE="10" FACE="Verdana">
+<DIV ID="displayContentDiv"></DIV>
+</FONT>
+</BODY>
+</HTML>
